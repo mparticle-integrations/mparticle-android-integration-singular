@@ -18,7 +18,7 @@ repositories {
 }
 
 dependencies {
-    compile 'com.singular.sdk:singular_sdk:7.0.1'
+    compile 'com.singular.sdk:singular_sdk:7.0.2'
 }
 
 android {
