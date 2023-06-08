@@ -217,10 +217,13 @@ open class SingularKit : KitIntegration(), ActivityListener, EventListener,
     private fun initializeSingular() {
         if (!isInitialized) {
             if (Singular.init(context, buildSingularConfig(settings))) {
+                currentUser?.id?.toString()?.let { Singular.setCustomUserId(it) }
                 isInitialized = true
                 singularSettings = settings
-                if (MPUtility.isFirebaseAvailable()) {
-                    Singular.setFCMDeviceToken(deviceToken)
+                deviceToken?.let { deviceToken ->
+                    if (MPUtility.isFirebaseAvailable()) {
+                        Singular.setFCMDeviceToken(deviceToken)
+                    }
                 }
             }
         }
