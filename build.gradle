@@ -43,6 +43,9 @@ repositories {
 
 android {
     namespace 'com.mparticle.kits.singular'
+    buildFeatures {
+        buildConfig = true
+    }
     defaultConfig {
         minSdkVersion 16
     }
