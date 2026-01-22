@@ -30,11 +30,17 @@ import org.json.JSONException
 import org.json.JSONObject
 import java.math.BigDecimal
 
-open class SingularKit : KitIntegration(), ActivityListener, EventListener,
-    PushListener, CommerceListener, ApplicationStateListener, UserAttributeListener,
+open class SingularKit :
+    KitIntegration(),
+    ActivityListener,
+    EventListener,
+    PushListener,
+    CommerceListener,
+    ApplicationStateListener,
+    UserAttributeListener,
     AttributeListener {
-    
     interface DeviceAttributionCallback : SingularDeviceAttributionHandler
+
     interface SdidAccessorHandler : SDIDAccessorHandler
 
     private val logger = SingularLog.getLogger(Singular::class.java.simpleName)
@@ -45,7 +51,7 @@ open class SingularKit : KitIntegration(), ActivityListener, EventListener,
     //region Kit Integration Implementation
     override fun onKitCreate(
         settings: Map<String, String>,
-        context: Context
+        context: Context,
     ): List<ReportingMessage> {
         // Returning the reporting message to state that the method was successful and
         // Preventing from the mParticle Kit to retry to activate to method.
@@ -54,14 +60,15 @@ open class SingularKit : KitIntegration(), ActivityListener, EventListener,
             ReportingMessage(
                 this,
                 ReportingMessage.MessageType.APP_STATE_TRANSITION,
-                System.currentTimeMillis(), null
-            )
+                System.currentTimeMillis(),
+                null,
+            ),
         )
         return messages
     }
 
-    fun buildSingularConfig(settings: Map<String, String>?): SingularConfig? {
-        return try {
+    fun buildSingularConfig(settings: Map<String, String>?): SingularConfig? =
+        try {
             val singularKey = settings?.get(API_KEY)
             val singularSecret = settings?.get(API_SECRET)
 
@@ -90,12 +97,14 @@ open class SingularKit : KitIntegration(), ActivityListener, EventListener,
                         linkParams.put(PASSTHROUGH, singularLinkParams.passthrough)
                         linkParams.put(IS_DEFERRED, singularLinkParams.isDeferred)
                         if (singularLinkParams.urlParameters != null) {
-                            linkParams.put(QUERY_PARAMS,
+                            linkParams.put(
+                                QUERY_PARAMS,
                                 (singularLinkParams.urlParameters as Map<*, *>?)?.let {
                                     JSONObject(
-                                        it
+                                        it,
                                     )
-                                })
+                                },
+                            )
                         }
                         attributionResult.parameters = linkParams
                     } catch (e: JSONException) {
@@ -111,9 +120,9 @@ open class SingularKit : KitIntegration(), ActivityListener, EventListener,
                 config.withLogLevel(Log.DEBUG)
             }
 
-            config.deviceAttributionHandler = deviceAttributionCallback;
+            config.deviceAttributionHandler = deviceAttributionCallback
 
-            config.withCustomSdid(customSdid, sdidAccessorHandler);
+            config.withCustomSdid(customSdid, sdidAccessorHandler)
 
             Singular.setWrapperNameAndVersion(MPARTICLE_WRAPPER_NAME, MPARTICLE_WRAPPER_VERSION)
             config
@@ -121,13 +130,10 @@ open class SingularKit : KitIntegration(), ActivityListener, EventListener,
             logger.error(CANT_BUILD_SINGULAR_CONFIG_MESSAGE, ex)
             null
         }
-    }
 
     override fun setOptOut(b: Boolean): List<ReportingMessage> = emptyList()
 
-    override fun getName(): String {
-        return KIT_NAME
-    }
+    override fun getName(): String = KIT_NAME
 
     override fun setInstallReferrer(intent: Intent) {}
 
@@ -144,7 +150,10 @@ open class SingularKit : KitIntegration(), ActivityListener, EventListener,
     }
 
     //region Unimplemented (Empty Methods)
-    override fun onActivityCreated(activity: Activity, bundle: Bundle?): List<ReportingMessage> {
+    override fun onActivityCreated(
+        activity: Activity,
+        bundle: Bundle?,
+    ): List<ReportingMessage> {
         initializeSingular()
         return emptyList()
     }
@@ -155,11 +164,10 @@ open class SingularKit : KitIntegration(), ActivityListener, EventListener,
 
     override fun onActivitySaveInstanceState(
         activity: Activity,
-        bundle: Bundle?
+        bundle: Bundle?,
     ): List<ReportingMessage> = emptyList()
 
     override fun onActivityDestroyed(activity: Activity): List<ReportingMessage> = emptyList()
-
 
     //endregion
     //endregion
@@ -171,11 +179,12 @@ open class SingularKit : KitIntegration(), ActivityListener, EventListener,
             val eventInfo = mpEvent.customAttributes
 
             // Logging the event with the Singular API
-            val eventStatus: Boolean = if (!eventInfo.isNullOrEmpty()) {
-                Singular.eventJSON(eventName, JSONObject(eventInfo))
-            } else {
-                Singular.event(eventName)
-            }
+            val eventStatus: Boolean =
+                if (!eventInfo.isNullOrEmpty()) {
+                    Singular.eventJSON(eventName, JSONObject(eventInfo))
+                } else {
+                    Singular.event(eventName)
+                }
 
             // If the Singular event logging was successful, return the message to the mParticle Kit
             // So it won't retry the event
@@ -189,22 +198,29 @@ open class SingularKit : KitIntegration(), ActivityListener, EventListener,
     //region Unimplemented (Empty Methods)
     override fun leaveBreadcrumb(s: String): List<ReportingMessage> = emptyList()
 
-
-    override fun logError(s: String, map: Map<String, String>): List<ReportingMessage> = emptyList()
+    override fun logError(
+        s: String,
+        map: Map<String, String>,
+    ): List<ReportingMessage> = emptyList()
 
     override fun logException(
         e: Exception,
         map: Map<String, String>,
-        s: String
+        s: String,
     ): List<ReportingMessage> = emptyList()
 
-    override fun logScreen(s: String, map: Map<String, String>): List<ReportingMessage> =
-        emptyList()
+    override fun logScreen(
+        s: String,
+        map: Map<String, String>,
+    ): List<ReportingMessage> = emptyList()
 
     //endregion
     //endregion
     //region Push Listener Implementation
-    override fun onPushRegistration(deviceToken: String, senderId: String): Boolean {
+    override fun onPushRegistration(
+        deviceToken: String,
+        senderId: String,
+    ): Boolean {
         // Saving the registration token to determine when the user uninstalls the app.
         this.deviceToken = deviceToken
         executeIfSingularInitialized({
@@ -218,7 +234,7 @@ open class SingularKit : KitIntegration(), ActivityListener, EventListener,
     private fun executeIfSingularInitialized(
         operation: () -> Unit,
         forceInitSingular: Boolean = false,
-        operationName: String
+        operationName: String,
     ) {
         if (isInitialized) {
             operation.invoke()
@@ -251,7 +267,10 @@ open class SingularKit : KitIntegration(), ActivityListener, EventListener,
     //region Unimplemented (Empty Methods)
     override fun willHandlePushMessage(intent: Intent): Boolean = false
 
-    override fun onPushMessageReceived(context: Context, intent: Intent) {}
+    override fun onPushMessageReceived(
+        context: Context,
+        intent: Intent,
+    ) {}
 
     //endregion
     //endregion
@@ -279,7 +298,7 @@ open class SingularKit : KitIntegration(), ActivityListener, EventListener,
                     product.name,
                     product.category,
                     product.quantity.toInt(),
-                    product.unitPrice
+                    product.unitPrice,
                 )
             }
         }
@@ -313,13 +332,16 @@ open class SingularKit : KitIntegration(), ActivityListener, EventListener,
         bigDecimal: BigDecimal,
         bigDecimal1: BigDecimal,
         s: String,
-        map: Map<String, String>
+        map: Map<String, String>,
     ): List<ReportingMessage> = emptyList()
 
     //endregion
     //endregion
     //region Deprecated Attribute Listener
-    override fun setUserAttribute(key: String, value: String) {
+    override fun setUserAttribute(
+        key: String,
+        value: String,
+    ) {
         // TODO: Debug these lines to understand the code
         val map = HashMap<String?, String?>()
         if (MParticle.UserAttributes.AGE == key) {
@@ -335,64 +357,80 @@ open class SingularKit : KitIntegration(), ActivityListener, EventListener,
             executeIfSingularInitialized(
                 {
                     Singular.eventJSON("UserAttribute", (map as Map<*, *>?)?.let { JSONObject(it) })
-                }, forceInitSingular = false, "setUserAttribute"
+                },
+                forceInitSingular = false,
+                "setUserAttribute",
             )
         }
     }
 
-    override fun setUserAttributeList(s: String, list: List<String>) {}
+    override fun setUserAttributeList(
+        s: String,
+        list: List<String>,
+    ) {}
 
     override fun onIncrementUserAttribute(
         key: String?,
         incrementedBy: Number?,
         value: String?,
-        user: FilteredMParticleUser?
+        user: FilteredMParticleUser?,
     ) {
     }
 
+    override fun onRemoveUserAttribute(
+        s: String,
+        filteredMParticleUser: FilteredMParticleUser,
+    ) {}
 
-    override fun onRemoveUserAttribute(s: String, filteredMParticleUser: FilteredMParticleUser) {}
     override fun onSetUserAttribute(
         s: String,
         o: Any,
-        filteredMParticleUser: FilteredMParticleUser
+        filteredMParticleUser: FilteredMParticleUser,
     ) {
     }
 
-    override fun onSetUserTag(s: String, filteredMParticleUser: FilteredMParticleUser) {}
+    override fun onSetUserTag(
+        s: String,
+        filteredMParticleUser: FilteredMParticleUser,
+    ) {}
+
     override fun onSetUserAttributeList(
         s: String,
         list: List<String>,
-        filteredMParticleUser: FilteredMParticleUser
+        filteredMParticleUser: FilteredMParticleUser,
     ) {
     }
 
     override fun onSetAllUserAttributes(
         map: Map<String, String>,
         map1: Map<String, List<String>>,
-        filteredMParticleUser: FilteredMParticleUser
+        filteredMParticleUser: FilteredMParticleUser,
     ) {
     }
 
-    override fun supportsAttributeLists(): Boolean {
-        return false
-    }
+    override fun supportsAttributeLists(): Boolean = false
 
     override fun onConsentStateUpdated(
         consentState: ConsentState,
         consentState1: ConsentState,
-        filteredMParticleUser: FilteredMParticleUser
+        filteredMParticleUser: FilteredMParticleUser,
     ) {
-
         executeIfSingularInitialized({
             consentState.ccpaConsentState?.let { Singular.limitDataSharing(it.isConsented) }
         }, forceInitSingular = false, "onConsentStateUpdated")
-
     }
 
-    override fun setAllUserAttributes(map: Map<String, String>, map1: Map<String, List<String>>) {}
+    override fun setAllUserAttributes(
+        map: Map<String, String>,
+        map1: Map<String, List<String>>,
+    ) {}
+
     override fun removeUserAttribute(s: String) {}
-    override fun setUserIdentity(identityType: IdentityType, s: String) {
+
+    override fun setUserIdentity(
+        identityType: IdentityType,
+        s: String,
+    ) {
         if (identityType == IdentityType.CustomerId) {
             executeIfSingularInitialized({
                 Singular.setCustomUserId(s)
@@ -450,18 +488,20 @@ open class SingularKit : KitIntegration(), ActivityListener, EventListener,
             "Can't build Singular Config in the mParticle Kit"
         private var singularSettings: Map<String, String>? = null
 
-        private var deviceAttributionCallback: DeviceAttributionCallback? = null;
-        private var customSdid: String? = null;
-        private var sdidAccessorHandler: SdidAccessorHandler? = null;
+        private var deviceAttributionCallback: DeviceAttributionCallback? = null
+        private var customSdid: String? = null
+        private var sdidAccessorHandler: SdidAccessorHandler? = null
 
         @JvmStatic fun setDeviceAttributionCallback(deviceAttributionCallback: DeviceAttributionCallback?) {
-            this.deviceAttributionCallback = deviceAttributionCallback;
+            this.deviceAttributionCallback = deviceAttributionCallback
         }
 
-        @JvmStatic fun setCustomSDID(customSDID: String?, sdidAccessorHandler: SdidAccessorHandler?) {
+        @JvmStatic fun setCustomSDID(
+            customSDID: String?,
+            sdidAccessorHandler: SdidAccessorHandler?,
+        ) {
             this.customSdid = customSDID
             this.sdidAccessorHandler = sdidAccessorHandler
         }
-
     }
 }

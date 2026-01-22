@@ -35,7 +35,7 @@ class KitTests {
 
     @Before
     fun setUp() {
-        //MockitoAnnotations.initMocks(this);
+        // MockitoAnnotations.initMocks(this);
         kit = MockSingularKit()
         settings = HashMap()
         settings[API_KEY] = "Test"
@@ -76,8 +76,8 @@ class KitTests {
             Assert.fail(
                 String.format(
                     "logEventWithInfo failed with exception message:%s",
-                    e.message
-                )
+                    e.message,
+                ),
             )
         } finally {
             Assert.assertTrue(!result.isNullOrEmpty())
@@ -105,8 +105,8 @@ class KitTests {
             Assert.fail(
                 String.format(
                     "logEventWithInfo failed with exception message:%s",
-                    e.message
-                )
+                    e.message,
+                ),
             )
         } finally {
             Assert.assertTrue(!result.isNullOrEmpty())
@@ -128,22 +128,25 @@ class KitTests {
     fun logCommercePurchaseEvents() {
         var result: List<ReportingMessage?>? = null
         try {
-            val commerceEvent = CommerceEvent.Builder(
-                Product.PURCHASE, Product.Builder("Testing", "Unknown", 2.0)
-                    .quantity(1.0)
-                    .category("Category")
+            val commerceEvent =
+                CommerceEvent
+                    .Builder(
+                        Product.PURCHASE,
+                        Product
+                            .Builder("Testing", "Unknown", 2.0)
+                            .quantity(1.0)
+                            .category("Category")
+                            .build(),
+                    ).addProduct(Product.Builder("Unknown", "b", 1.0).build())
                     .build()
-            )
-                .addProduct(Product.Builder("Unknown", "b", 1.0).build())
-                .build()
             result = kit?.logEvent(commerceEvent)
         } catch (e: Exception) {
             e.printStackTrace()
             Assert.fail(
                 String.format(
                     "logCommercePurchaseEvents failed with exception message:%s",
-                    e.message
-                )
+                    e.message,
+                ),
             )
         } finally {
             Assert.assertTrue(!result.isNullOrEmpty())
@@ -154,22 +157,25 @@ class KitTests {
     fun logCommerceNonPurchaseEvents() {
         var result: List<ReportingMessage?>? = null
         try {
-            val commerceEvent = CommerceEvent.Builder(
-                Product.DETAIL, Product.Builder("Testing", "Unknown", 2.0)
-                    .quantity(1.0)
-                    .category("Category")
+            val commerceEvent =
+                CommerceEvent
+                    .Builder(
+                        Product.DETAIL,
+                        Product
+                            .Builder("Testing", "Unknown", 2.0)
+                            .quantity(1.0)
+                            .category("Category")
+                            .build(),
+                    ).addProduct(Product.Builder("Unknown", "b", 1.0).build())
                     .build()
-            )
-                .addProduct(Product.Builder("Unknown", "b", 1.0).build())
-                .build()
             result = kit?.logEvent(commerceEvent)
         } catch (e: Exception) {
             e.printStackTrace()
             Assert.fail(
                 String.format(
                     "logCommerceNonPurchaseEvents failed with exception message:%s",
-                    e.message
-                )
+                    e.message,
+                ),
             )
         } finally {
             Assert.assertTrue(!result.isNullOrEmpty())
